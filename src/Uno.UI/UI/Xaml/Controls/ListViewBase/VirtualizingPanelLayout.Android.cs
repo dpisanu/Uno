@@ -1008,7 +1008,7 @@ namespace Windows.UI.Xaml.Controls
 				var gapToStart = GetContentStart();
 				if (gapToStart > 0)
 				{
-					if(ScrollOrientation == Orientation.Vertical)
+					if (ScrollOrientation == Orientation.Vertical)
 					{
 						ScrollVerticallyBy(gapToStart, recycler, state);
 						XamlParent.NativePanel.OnScrolled(gapToStart, 0);
@@ -1051,7 +1051,23 @@ namespace Windows.UI.Xaml.Controls
 			if (!_areHeaderAndFooterCreated)
 			{
 				headerOffset = CreateHeaderAndFooter(extentOffset, InitialBreadthPadding, availableBreadth, recycler, state);
-				extentOffset += headerOffset;
+
+				if(headerOffset > 0)
+				{
+					extentOffset += headerOffset;
+
+					if (ScrollOrientation == Orientation.Vertical)
+					{
+						OffsetChildrenVertical(-headerOffset);
+					}
+					else
+					{
+						OffsetChildrenHorizontal(-headerOffset);
+					}
+
+					ContentOffset += headerOffset;
+				}
+
 				_areHeaderAndFooterCreated = true;
 			}
 
@@ -1060,7 +1076,7 @@ namespace Windows.UI.Xaml.Controls
 			if (!_isInitialPaddingExtentOffsetApplied)
 			{
 				var group = GetTrailingGroup(direction);
-				if(group != null)
+				if (group != null)
 				{
 					group.Start += InitialExtentPadding;
 				}
