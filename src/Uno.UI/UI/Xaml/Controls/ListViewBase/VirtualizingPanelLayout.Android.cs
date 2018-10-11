@@ -1064,8 +1064,6 @@ namespace Windows.UI.Xaml.Controls
 					{
 						OffsetChildrenHorizontal(-headerOffset);
 					}
-
-					ContentOffset += headerOffset;
 				}
 
 				_areHeaderAndFooterCreated = true;
