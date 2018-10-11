@@ -1011,7 +1011,7 @@ namespace Windows.UI.Xaml.Controls
 					if (ScrollOrientation == Orientation.Vertical)
 					{
 						ScrollVerticallyBy(gapToStart, recycler, state);
-						XamlParent.NativePanel.OnScrolled(gapToStart, 0);
+						XamlParent.NativePanel.OnScrolled(0, gapToStart);
 					}
 					else
 					{
@@ -1047,27 +1047,12 @@ namespace Windows.UI.Xaml.Controls
 		{
 			int extentOffset = scrollOffset;
 			var isGrouping = XamlParent?.IsGrouping ?? false;
-			var headerOffset = 0;
+			var headerExtent = 0;
 			if (!_areHeaderAndFooterCreated)
 			{
-				headerOffset = CreateHeaderAndFooter(extentOffset, InitialBreadthPadding, availableBreadth, recycler, state);
+				headerExtent = CreateHeaderAndFooter(extentOffset, InitialBreadthPadding, availableBreadth, recycler, state);
 				// Set this bool before calling ScrollBy methods or it will cause an infinite loop
 				_areHeaderAndFooterCreated = true;
-
-				if (headerOffset > 0)
-				{
-					if (ScrollOrientation == Orientation.Vertical)
-					{
-						ScrollVerticallyBy(-headerOffset, recycler, state);
-					}
-					else
-					{
-						ScrollHorizontallyBy(-headerOffset, recycler, state);
-					}
-					
-					//Reset the ContentOffset after we scrolled to the beginning of the list
-					ContentOffset = 0;
-				}
 			}
 
 			AssertValidState();
@@ -1098,11 +1083,11 @@ namespace Windows.UI.Xaml.Controls
 						group.Start -= _previousHeaderExtent.Value;
 					}
 
-					group.Start += headerOffset;
+					group.Start += headerExtent;
 				}
 				else if (_dynamicSeedStart.HasValue && _previousHeaderExtent.HasValue)
 				{
-					_dynamicSeedStart = _dynamicSeedStart.Value - _previousHeaderExtent.Value + headerOffset;
+					_dynamicSeedStart = _dynamicSeedStart.Value - _previousHeaderExtent.Value + headerExtent;
 				}
 				_previousHeaderExtent = null;
 				_isInitialHeaderExtentOffsetApplied = true;
@@ -1114,6 +1099,23 @@ namespace Windows.UI.Xaml.Controls
 			{
 				CreateGroupHeader(direction, InitialBreadthPadding, availableBreadth, recycler, state, GetLeadingGroup(direction));
 				_isInitialGroupHeaderCreated = true;
+			}
+
+			if (headerExtent > 0)
+			{
+				if (ScrollOrientation == Orientation.Vertical)
+				{
+					ScrollVerticallyBy(-headerExtent, recycler, state);
+					XamlParent?.NativePanel?.OnScrolled(0, -headerExtent);
+				}
+				else
+				{
+					ScrollHorizontallyBy(-headerExtent, recycler, state);
+					XamlParent?.NativePanel?.OnScrolled(-headerExtent, 0);
+				}
+
+				//Reset the ContentOffset after we scrolled to the beginning of the list
+				ContentOffset = 0;
 			}
 
 			AssertValidState();
