@@ -1051,22 +1051,23 @@ namespace Windows.UI.Xaml.Controls
 			if (!_areHeaderAndFooterCreated)
 			{
 				headerOffset = CreateHeaderAndFooter(extentOffset, InitialBreadthPadding, availableBreadth, recycler, state);
+				// Set this bool before calling ScrollBy methods or it will cause an infinite loop
+				_areHeaderAndFooterCreated = true;
 
-				if(headerOffset > 0)
+				if (headerOffset > 0)
 				{
-					extentOffset += headerOffset;
-
 					if (ScrollOrientation == Orientation.Vertical)
 					{
-						OffsetChildrenVertical(-headerOffset);
+						ScrollVerticallyBy(-headerOffset, recycler, state);
 					}
 					else
 					{
-						OffsetChildrenHorizontal(-headerOffset);
+						ScrollHorizontallyBy(-headerOffset, recycler, state);
 					}
+					
+					//Reset the ContentOffset after we scrolled to the beginning of the list
+					ContentOffset = 0;
 				}
-
-				_areHeaderAndFooterCreated = true;
 			}
 
 			AssertValidState();
